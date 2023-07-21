@@ -1,0 +1,107 @@
+body {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoomable {
+  border: 1px solid black;
+  padding: 20px;
+  transition: transform 0.3s; /* smooth transition */
+}
+.box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.screencast {
+  position: relative;
+  width: 1000px;
+  height: 500px;
+
+  display: flex;
+
+  overflow: hidden;
+}
+.screencast .inner {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: rgb(255, 255, 255);
+}
+.screencast .inner .inner_center {
+  position: relative;
+  flex: 1 1 0%;
+  height: 100%;
+}
+.screencast .inner .inner_center .inner_center_box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+.screencast .inner .inner_center .inner_center_box .inner_center_box_cursor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+.screencast
+  .inner
+  .inner_center
+  .inner_center_box
+  .inner_center_box_cursor
+  .inner_center_box_bg {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: rgb(204, 204, 204);
+}
+.screencast
+  .inner
+  .inner_center
+  .inner_center_box
+  .inner_center_box_cursor
+  .inner_center_box_bg
+  .infinite-viewer-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  top: 0;
+  left: 0;
+  will-change: scroll-position;
+}
+
+.screencast
+  .inner
+  .inner_center
+  .inner_center_box
+  .inner_center_box_cursor
+  .inner_center_box_bg
+  .infinite-viewer-wrapper
+  .infinite-viewer-scroll-area {
+  width: calc(100% - 1000px);
+  height: calc(100% - 1000px);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+.screencast
+  .inner
+  .inner_center
+  .inner_center_box
+  .inner_center_box_cursor
+  .inner_center_box_bg
+  .infinite-viewer-wrapper
+  .player-area {
+  width: 3840px;
+  height: 2160px;
+  background: url(/assets/img/bbgg.png) repeat black;
+}

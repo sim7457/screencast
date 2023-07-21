@@ -1,0 +1,10 @@
+@charset "UTF-8";
+
+@import url(../fonts/notosanskr.css);
+
+@font-face {
+    font-family: 'MapoDPP';
+    src: url('../fonts/MapoDPP.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
