@@ -12,46 +12,31 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&amp;family=Roboto+Mono&amp;display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
     <link href="assets/css/ltr-core.css" rel="stylesheet" />
     <link href="assets/css/ltr-vendor.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
-    <link
-      href="assets/images/favicon.ico"
-      rel="shortcut icon"
-      type="image/x-icon"
-    />
-    <link rel="stylesheet" href="assets/css/datepicker.min.css" />
-    <link rel="stylesheet" href="assets/css/timepicker.min.css" />
-    <link rel="stylesheet" href="assets/css/editor-style.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css"
-    />
+
     <link rel="stylesheet" href="assets/css/screencast.css" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <title>JSIGN</title>
   </head>
   <body>
-    <div class="zoomable">
-      <div class="box">
-        <div class="screencast">
-          <div class="inner">
-            <div class="inner_center">
-              <div class="inner_center_box">
-                <div class="inner_center_box_cursor">
-                  <div class="inner_center_box_bg">
-                    <div class="infinite-viewer-wrapper">
-                      <div class="infinite-viewer-scroll-area"></div>
-                      <div class="player-area"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div id="resolutionDropdown">
+      <label for="resolution">해상도 선택: </label>
+      <select id="resolution">
+        <option value="1920x1080">1920x1080</option>
+        <option value="3840x2160">3840x2160</option>
+      </select>
     </div>
-
-    <script src="scripts.js"></script>
+    <div id="container">
+      <button id="addLayer">레이어 추가</button>
+    </div>
+    <script src="script.js"></script>
   </body>
 </html>

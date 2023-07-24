@@ -4,8 +4,8 @@ $(document).ready(function () {
   function addResizableBox(isInitial = false) {
     boxCount++;
     const $resizableBox = $(`<div class="resizable-box" id="box${boxCount}">
-                                    <div class="size-display"></div>
-                                </div>`);
+                                      <div class="size-display"></div>
+                                  </div>`);
 
     if (isInitial) {
       $resizableBox.css({
