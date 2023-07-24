@@ -4,8 +4,8 @@ $(document).ready(function () {
   function addResizableBox(isInitial = false) {
     boxCount++;
     const $resizableBox = $(`<div class="resizable-box" id="box${boxCount}">
-                                      <div class="size-display"></div>
-                                  </div>`);
+                                    <div class="size-display"></div>
+                                </div>`);
 
     if (isInitial) {
       $resizableBox.css({
@@ -29,21 +29,38 @@ $(document).ready(function () {
     $resizableBox.resizable({
       containment: "#container",
       resize: function (event, ui) {
-        updateSizeDisplay($resizableBox);
+        const width = Math.round(ui.size.width);
+        const height = Math.round(ui.size.height);
+        ui.size.width = width - (width % 8);
+        ui.size.height = height - (height % 8);
+        $resizableBox
+          .find(".size-display")
+          .text(ui.size.width + "px x " + ui.size.height + "px");
       },
     });
 
-    $resizableBox.draggable({
-      containment: "#container",
-      handle: ".size-display",
+    const $deleteButton = $('<button class="delete-box">X</button>');
+    $deleteButton.click(function () {
+      $resizableBox.remove();
     });
+    $resizableBox.append($deleteButton);
 
     updateSizeDisplay($resizableBox);
   }
 
   function updateSizeDisplay($box) {
-    const width = $box.width();
-    const height = $box.height();
+    let width = Math.round($box.width());
+    let height = Math.round($box.height());
+
+    // 모눈 패턴과 맞추기
+    width = width - (width % 8);
+    height = height - (height % 8);
+
+    $box.css({
+      width: `${width}px`,
+      height: `${height}px`,
+    });
+
     $box.find(".size-display").text(width + "px x " + height + "px");
   }
 
@@ -64,3 +81,5 @@ $(document).ready(function () {
   // 페이지 로드 시 초기 박스 생성
   addResizableBox(true);
 });
+
+//$resizableBox.resizable
