@@ -1,30 +1,33 @@
 $(document).ready(function () {
-  // 변수 선언
-  let boxCount = 0; // 현재 박스의 수를 추적
-  let copiedBox = null; // 복사된 박스를 저장
-  let selectedBox = null; // 현재 선택된 박스를 저장
+  let boxCount = 0;
+  let copiedBox = null;
+  let selectedBox = null;
 
-  // 'Add Layer' 버튼 클릭 시 새 박스 추가
-  $("#addLayer").click(() => addResizableBox());
+  // 레이어 추가 버튼 이벤트
+  $("#addLayer").click(() => addResizableBox(true));
+
   // 새로운 박스를 추가하는 함수
   function addResizableBox(isInitial = false) {
     boxCount++;
-    const alphabet = String.fromCharCode(64 + boxCount); // 박스 중앙에 들어갈 알파벳 생성
-    const $resizableBox = $(`<div class="resizable-box" id="box${boxCount}">
-                                      <div class="size-display"></div>
-                                      <div class="box-center">${alphabet}</div>
-                                  </div>`);
+    const alphabet = String.fromCharCode(64 + boxCount);
 
-    // 초기 박스인 경우 크기 및 위치 설정
+    // 박스의 HTML 구조
+    const $resizableBox = $(`
+                <div class="resizable-box" id="box${boxCount}">
+                    <div class="size-display"></div>
+                    <div class="box-center">${alphabet}</div>
+                </div>`);
+
     if (isInitial) {
       $resizableBox.css({
-        width: "500px",
-        height: "500px",
         top: "0",
         left: "0",
+        width: "500px",
+        height: "500px",
       });
+      updateSizeDisplay($resizableBox);
     } else {
-      // 새로 추가된 박스의 기본 크기 및 위치 설정
+      // 다른 박스들을 위해 기본 크기 설정 및 중앙에 배치
       $resizableBox.css({
         width: "100px",
         height: "100px",
@@ -33,98 +36,143 @@ $(document).ready(function () {
         transform: "translate(-50%, -50%)",
       });
     }
-
-    // 박스를 컨테이너에 추가
     $("#container").append($resizableBox);
-    setupResizableDraggable($resizableBox); // 드래그 및 리사이즈 기능 활성화
-    updateSizeDisplay($resizableBox); // 크기 디스플레이 업데이트
+    setupResizableDraggable($resizableBox, isInitial);
+    updateSizeDisplay($resizableBox);
   }
 
-  // 박스에 드래그 및 리사이즈 기능을 설정하는 함수
-  function setupResizableDraggable($box) {
-    // 이미 기능이 활성화된 경우 초기화
-    if ($box.hasClass("ui-resizable")) {
-      $box.resizable("destroy");
-    }
-    if ($box.hasClass("ui-draggable")) {
-      $box.draggable("destroy");
-    }
-
+  // 박스를 크기 조절 가능하고 드래그 가능하게 만드는 함수
+  function setupResizableDraggable($box, isInitial) {
     $box
       .resizable({
-        containment: "#container", // 박스가 이 범위 내에서만 리사이즈 됨
-        grid: [16, 16], // 리사이즈 그리드 크기 설정
-        handles: "n, e, s, w, ne, se, sw, nw", // 리사이즈 핸들 위치
+        containment: "#container",
+        grid: [1, 1],
+        handles: "n, e, s, w, ne, se, sw, nw",
         resize: function (event, ui) {
           const width = Math.round(ui.size.width);
           const height = Math.round(ui.size.height);
           $(ui.element)
             .find(".size-display")
-            .text(width + "px x " + height + "px"); // 리사이즈 중 크기 업데이트
+            .text(width + "px x " + height + "px");
         },
       })
       .draggable({
-        containment: "#container", // 박스가 이 범위 내에서만 드래그 됨
-        grid: [16, 16], // 드래그 그리드 크기 설정
-      })
-      .click(function () {
-        // 선택된 박스의 스타일 변경
+        containment: "#container",
+        grid: [1, 1],
+      });
+
+    // 초기 박스가 올바른 치수를 가지도록 보장
+    if (isInitial) {
+      $box.css({
+        width: "500px",
+        height: "500px",
+      });
+      updateSizeDisplay($box);
+    }
+  }
+
+  // 클릭할 때 박스를 선택하는 이벤트
+  $("#container").on("click", ".resizable-box", function (e) {
+    e.stopPropagation();
+
+    if (selectedBox) {
+      selectedBox.removeClass("selected");
+    }
+
+    selectedBox = $(this);
+    selectedBox.addClass("selected");
+  });
+
+  // 이 이벤트 리스너는 박스의 선택을 취소하기 위한 배경 클릭을 처리합니다
+  $("#container").on("click", function (e) {
+    if (e.target === this && selectedBox) {
+      selectedBox.removeClass("selected");
+      selectedBox = null;
+    }
+  });
+
+  // 박스 크기를 표시하고 그리드에 맞게 크기 조절
+  function updateSizeDisplay($box) {
+    let width = Math.round($box.width());
+    let height = Math.round($box.height());
+    width = width - (width % 1);
+    height = height - (height % 1);
+
+    $box.css({
+      width: `${width}px`,
+      height: `${height}px`,
+    });
+
+    $box.find(".size-display").text(width + "px x " + height + "px");
+  }
+
+  // 컨테이너 해상도 변경 이벤트
+  $("#resolution").change(function () {
+    const [width, height] = $(this).val().split("x");
+    $("#container").css({
+      width: `${width}px`,
+      height: `${height}px`,
+    });
+  });
+
+  // 해상도 변경 기능 추가
+  $("#resolutionDropdown").change(function () {
+    const resolution = $(this).val();
+    switch (resolution) {
+      case "1080":
+        $("#container").css({
+          width: "1920px",
+          height: "1080px",
+        });
+        break;
+      case "720":
+        $("#container").css({
+          width: "1280px",
+          height: "720px",
+        });
+        break;
+      case "480":
+        $("#container").css({
+          width: "854px",
+          height: "480px",
+        });
+        break;
+      case "360":
+        $("#container").css({
+          width: "640px",
+          height: "360px",
+        });
+        break;
+      case "4k":
+        $("#container").css({
+          width: "3840px",
+          height: "2160px",
+        });
+        break;
+      default:
+        break;
+    }
+  });
+
+  // 복사, 붙여넣기 및 삭제 기능을 위한 키다운 이벤트
+  $(document).keydown(function (e) {
+    if (e.ctrlKey && (e.key === "c" || e.key === "C") && selectedBox) {
+      copiedBox = selectedBox.clone();
+      boxCount++;
+      copiedBox.attr("id", "box" + boxCount);
+      copiedBox.find(".box-center").text(String.fromCharCode(64 + boxCount));
+    }
+
+    if (e.ctrlKey && (e.key === "v" || e.key === "V") && copiedBox) {
+      $("#container").append(copiedBox);
+      setupResizableDraggable(copiedBox, false);
+      copiedBox.click(function () {
         if (selectedBox) {
           selectedBox.removeClass("selected");
         }
         selectedBox = $(this);
         selectedBox.addClass("selected");
       });
-  }
-
-  // 박스 크기 디스플레이 업데이트 함수
-  function updateSizeDisplay($box) {
-    let width = Math.round($box.width());
-    let height = Math.round($box.height());
-
-    width = width - (width % 16); // 크기를 16의 배수로 조정
-    height = height - (height % 16);
-
-    // 크기 변경
-    $box.css({
-      width: `${width}px`,
-      height: `${height}px`,
-    });
-
-    $box.find(".size-display").text(width + "px x " + height + "px"); // 크기 텍스트 업데이트
-  }
-
-  // 'Resolution' 변경 시 모든 박스의 크기 변경
-  $("#resolution").change(function () {
-    const [width, height] = $(this).val().split("x");
-    $(".resizable-box").css({
-      width: `${width}px`,
-      height: `${height}px`,
-    });
-  });
-
-  // 키보드 이벤트 핸들러
-  $(document).keydown(function (e) {
-    // Ctrl + C로 박스 복사
-    if (e.ctrlKey && (e.key === "c" || e.key === "C")) {
-      copiedBox = selectedBox.clone();
-      boxCount++;
-      copiedBox.attr("id", "box" + boxCount);
-      copiedBox.find(".box-center").text(String.fromCharCode(64 + boxCount));
-
-      // 복사된 박스의 기존 핸들러 제거
-      if (copiedBox.hasClass("ui-resizable")) {
-        copiedBox.resizable("destroy");
-      }
-      if (copiedBox.hasClass("ui-draggable")) {
-        copiedBox.draggable("destroy");
-      }
-    }
-
-    if (e.ctrlKey && (e.key === "v" || e.key === "V") && copiedBox) {
-      $("#container").append(copiedBox);
-      setupResizableDraggable(copiedBox);
-      updateSizeDisplay(copiedBox);
       copiedBox = null;
     }
 
@@ -136,6 +184,5 @@ $(document).ready(function () {
     }
   });
 
-  // 첫 박스 생성
   addResizableBox(true);
 });

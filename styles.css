@@ -1,0 +1,43 @@
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+#controls {
+  margin-bottom: 10px;
+}
+
+#container {
+  position: relative;
+  border: 2px solid black;
+  width: 1280px;
+  height: 720px;
+}
+
+.resizable-box {
+  position: absolute;
+  border: 1px solid #333;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.size-display,
+.box-center {
+  text-align: center;
+}
+
+.selected {
+  border-color: blue;
+}
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  background-color: red;
+  cursor: se-resize;
+}

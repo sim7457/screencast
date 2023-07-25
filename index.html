@@ -7,14 +7,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&amp;family=Roboto+Mono&amp;display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
-    />
+
     <link href="assets/css/ltr-core.css" rel="stylesheet" />
     <link href="assets/css/ltr-vendor.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
@@ -22,16 +15,18 @@
     <title>JSIGN</title>
   </head>
   <body>
-    <div id="resolutionDropdown">
-      <label for="resolution">해상도 선택: </label>
-      <select id="resolution">
-        <option value="1920x1080">1920x1080</option>
-        <option value="3840x2160">3840x2160</option>
-      </select>
-    </div>
-    <button id="addLayer">레이어 추가</button>
     <div id="containerOuter">
-      <div id="container"></div>
+      <div id="container">
+        <!-- Resizable boxes will be added here -->
+      </div>
+      <button id="addLayer">Add Layer</button>
+      <select id="resolutionDropdown">
+        <option value="4k">3840x2160 (4K)</option>
+        <option value="1080">1920x1080 (Full HD)</option>
+        <option value="720">1280x720</option>
+        <option value="480">854x480</option>
+        <option value="360">640x360</option>
+      </select>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
