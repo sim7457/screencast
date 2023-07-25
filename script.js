@@ -27,13 +27,16 @@ $(document).ready(function () {
       });
       updateSizeDisplay($resizableBox);
     } else {
+      let containerWidth = $("#container").width();
+      let containerHeight = $("#container").height();
+      let boxWidth = 100;
+      let boxHeight = 100;
       // 다른 박스들을 위해 기본 크기 설정 및 중앙에 배치
       $resizableBox.css({
-        width: "100px",
-        height: "100px",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
+        width: `${boxWidth}px`,
+        height: `${boxHeight}px`,
+        top: `${(containerHeight - boxHeight) / 2}px`,
+        left: `${(containerWidth - boxWidth) / 2}px`,
       });
     }
     $("#container").append($resizableBox);
@@ -48,8 +51,13 @@ $(document).ready(function () {
       grid: [1, 1],
       handles: "n, e, s, w, ne, se, sw, nw",
       resize: function (event, ui) {
-        const width = Math.round(ui.size.width);
-        const height = Math.round(ui.size.height);
+        let scaledWidth = ui.size.width / 0.677;
+        let scaledHeight = ui.size.height / 0.677;
+        ui.size.width = scaledWidth;
+        ui.size.height = scaledHeight;
+
+        const width = Math.round(scaledWidth);
+        const height = Math.round(scaledHeight);
         $(ui.element)
           .find(".size-display")
           .text(width + "px x " + height + "px");
@@ -59,6 +67,31 @@ $(document).ready(function () {
     $box.draggable({
       containment: "#container",
       grid: [1, 1],
+      drag: function (event, ui) {
+        let scaledLeft = ui.position.left / 0.677;
+        let scaledTop = ui.position.top / 0.677;
+        ui.position.left = scaledLeft;
+        ui.position.top = scaledTop;
+      },
+      stop: function (event, ui) {
+        let pos = $(this).position();
+        let container = $("#container");
+        let boxWidth = $(this).width();
+        let boxHeight = $(this).height();
+
+        if (pos.top < 0) {
+          $(this).css("top", "0px");
+        }
+        if (pos.left < 0) {
+          $(this).css("left", "0px");
+        }
+        if (pos.left + boxWidth > container.width()) {
+          $(this).css("left", container.width() - boxWidth + "px");
+        }
+        if (pos.top + boxHeight > container.height()) {
+          $(this).css("top", container.height() - boxHeight + "px");
+        }
+      },
     });
 
     // 초기 박스가 올바른 치수를 가지도록 보장
