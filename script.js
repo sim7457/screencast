@@ -44,6 +44,45 @@ $(document).ready(function () {
     updateSizeDisplay($resizableBox);
   }
 
+  function handleScroll(ui, actionType) {
+    const sensitivity = 50;
+    const scrollSpeed = 15;
+    const container = $("#viewport");
+    const containerScrollTop = container.scrollTop();
+    const containerScrollLeft = container.scrollLeft();
+    const boxWidth = $(ui.element).width();
+    const boxHeight = $(ui.element).height();
+
+    let bottomPosition, rightPosition;
+
+    if (actionType === "resize") {
+      bottomPosition = ui.position.top + ui.size.height;
+      rightPosition = ui.position.left + ui.size.width;
+    } else if (actionType === "drag") {
+      bottomPosition = ui.position.top + boxHeight;
+      rightPosition = ui.position.left + boxWidth;
+    }
+
+    if (
+      bottomPosition >
+      containerScrollTop + container.height() - sensitivity
+    ) {
+      container.scrollTop(containerScrollTop + scrollSpeed);
+    }
+
+    if (rightPosition > containerScrollLeft + container.width() - sensitivity) {
+      container.scrollLeft(containerScrollLeft + scrollSpeed);
+    }
+
+    if (ui.position.top < containerScrollTop + sensitivity) {
+      container.scrollTop(containerScrollTop - scrollSpeed);
+    }
+
+    if (ui.position.left < containerScrollLeft + sensitivity) {
+      container.scrollLeft(containerScrollLeft - scrollSpeed);
+    }
+  }
+
   // 박스를 크기 조절 가능하고 드래그 가능하게 만드는 함수
   function setupResizableDraggable($box, isInitial) {
     $box.resizable({
@@ -51,16 +90,16 @@ $(document).ready(function () {
       grid: [1, 1],
       handles: "n, e, s, w, ne, se, sw, nw",
       resize: function (event, ui) {
-        let scaledWidth = ui.size.width / 0.677;
-        let scaledHeight = ui.size.height / 0.677;
-        ui.size.width = scaledWidth;
-        ui.size.height = scaledHeight;
-
-        const width = Math.round(scaledWidth);
-        const height = Math.round(scaledHeight);
+        const width = Math.round(ui.size.width);
+        const height = Math.round(ui.size.height);
         $(ui.element)
+          .css({
+            width: `${width}px`,
+            height: `${height}px`,
+          })
           .find(".size-display")
           .text(width + "px x " + height + "px");
+        handleScroll(ui, "resize");
       },
     });
 
@@ -68,10 +107,7 @@ $(document).ready(function () {
       containment: "#container",
       grid: [1, 1],
       drag: function (event, ui) {
-        let scaledLeft = ui.position.left / 0.677;
-        let scaledTop = ui.position.top / 0.677;
-        ui.position.left = scaledLeft;
-        ui.position.top = scaledTop;
+        handleScroll(ui, "drag");
       },
       stop: function (event, ui) {
         let pos = $(this).position();
