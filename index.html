@@ -7,7 +7,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&amp;family=Roboto+Mono&amp;display=swap"
       rel="stylesheet"
@@ -19,25 +18,24 @@
     <link href="assets/css/ltr-core.css" rel="stylesheet" />
     <link href="assets/css/ltr-vendor.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
-
     <link rel="stylesheet" href="assets/css/screencast.css" />
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <title>JSIGN</title>
   </head>
   <body>
-    <body>
-      <div id="resolutionDropdown">
-        <label for="resolution">해상도 선택: </label>
-        <select id="resolution">
-          <option value="1920x1080">1920x1080</option>
-          <option value="3840x2160">3840x2160</option>
-        </select>
-      </div>
-      <div id="container">
-        <button id="addLayer">레이어 추가</button>
-      </div>
+    <div id="resolutionDropdown">
+      <label for="resolution">해상도 선택: </label>
+      <select id="resolution">
+        <option value="1920x1080">1920x1080</option>
+        <option value="3840x2160">3840x2160</option>
+      </select>
+    </div>
+    <button id="addLayer">레이어 추가</button>
+    <div id="containerOuter">
+      <div id="container"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
