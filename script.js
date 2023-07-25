@@ -43,23 +43,23 @@ $(document).ready(function () {
 
   // 박스를 크기 조절 가능하고 드래그 가능하게 만드는 함수
   function setupResizableDraggable($box, isInitial) {
-    $box
-      .resizable({
-        containment: "#container",
-        grid: [1, 1],
-        handles: "n, e, s, w, ne, se, sw, nw",
-        resize: function (event, ui) {
-          const width = Math.round(ui.size.width);
-          const height = Math.round(ui.size.height);
-          $(ui.element)
-            .find(".size-display")
-            .text(width + "px x " + height + "px");
-        },
-      })
-      .draggable({
-        containment: "#container",
-        grid: [1, 1],
-      });
+    $box.resizable({
+      containment: "#container",
+      grid: [1, 1],
+      handles: "n, e, s, w, ne, se, sw, nw",
+      resize: function (event, ui) {
+        const width = Math.round(ui.size.width);
+        const height = Math.round(ui.size.height);
+        $(ui.element)
+          .find(".size-display")
+          .text(width + "px x " + height + "px");
+      },
+    });
+
+    $box.draggable({
+      containment: "#container",
+      grid: [1, 1],
+    });
 
     // 초기 박스가 올바른 치수를 가지도록 보장
     if (isInitial) {
