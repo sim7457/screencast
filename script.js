@@ -22,8 +22,8 @@ $(document).ready(function () {
       $resizableBox.css({
         top: "0",
         left: "0",
-        width: "500px",
-        height: "500px",
+        width: "300px",
+        height: "300px",
       });
       updateSizeDisplay($resizableBox);
     } else {
@@ -133,8 +133,8 @@ $(document).ready(function () {
     // 초기 박스가 올바른 치수를 가지도록 보장
     if (isInitial) {
       $box.css({
-        width: "500px",
-        height: "500px",
+        width: "300px",
+        height: "300px",
       });
       updateSizeDisplay($box);
     }
