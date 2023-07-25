@@ -15,7 +15,13 @@ body {
   position: relative;
   background-color: black;
 }
-
+#viewport {
+  width: 100%; /* or any fixed width you want, e.g., 1920px for full HD monitors */
+  height: 100%; /* using vh to occupy most of the screen */
+  overflow: scroll;
+  border: 2px solid black;
+  position: relative;
+}
 #container {
   transform: scale(0.677);
   transform-origin: top left;
@@ -36,6 +42,7 @@ body {
       #333 16px
     );
   position: relative;
+  background-color: #000;
   z-index: 1;
 }
 
@@ -83,7 +90,7 @@ body {
   border-radius: 5px;
 }
 .ui-resizable-handle {
-  background: #000;
+  background: #fff;
   width: 10px;
   height: 10px;
   position: absolute;
