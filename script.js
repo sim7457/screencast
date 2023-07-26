@@ -253,9 +253,6 @@ $(document).ready(function () {
   }
 
   function positionGuideLines(ui, type) {
-    // 선택된 박스만 가이드라인이 보이도록 설정
-    if (!$(ui.helper).hasClass("selected")) return;
-
     $(".guide-line").remove(); // Remove all existing guide lines
 
     let $otherBoxes = $(".resizable-box").not(ui.helper);
@@ -334,6 +331,31 @@ $(document).ready(function () {
         })
         .appendTo("#container")
         .show();
+    });
+
+    $(".resizable-box").draggable({
+      drag: function (event, ui) {
+        positionGuideLines(ui, "drag");
+
+        const snapTolerance = 3;
+
+        let boxLeft = ui.position.left;
+        let boxTop = ui.position.top;
+
+        $(".vertical-guide").each(function () {
+          let guideLeft = $(this).position().left;
+          if (Math.abs(boxLeft - guideLeft) <= snapTolerance) {
+            ui.position.left = guideLeft;
+          }
+        });
+
+        $(".horizontal-guide").each(function () {
+          let guideTop = $(this).position().top;
+          if (Math.abs(boxTop - guideTop) <= snapTolerance) {
+            ui.position.top = guideTop;
+          }
+        });
+      },
     });
   }
 
