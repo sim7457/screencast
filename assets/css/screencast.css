@@ -169,3 +169,11 @@ body {
   width: 100%;
   background-color: rgba(0, 123, 255, 0.5);
 }
+
+.selection-box {
+  border: 1px dashed #000;
+  background-color: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  pointer-events: none;
+  z-index: 9999;
+}

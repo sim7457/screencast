@@ -2,6 +2,9 @@ $(document).ready(function () {
   let boxCount = 0;
   let copiedBox = null;
   let selectedBox = null;
+  let selectionBox = null;
+  let startPoint = null;
+  let draggingBox = false;
 
   // 레이어 추가 버튼 이벤트
   $("#addLayer").click(() => addResizableBox(true));
@@ -398,6 +401,80 @@ $(document).ready(function () {
         break;
       default:
         break;
+    }
+  });
+
+  $(".resizable-box")
+    .mousedown(function () {
+      draggingBox = true;
+    })
+    .mouseup(function () {
+      draggingBox = false;
+    });
+
+  $("body").mousedown(function (e) {
+    if ($(e.target).is("#containerOuter") || $(e.target).is("#container")) {
+      if (draggingBox) {
+        return;
+      }
+      startPoint = {
+        x: e.pageX - $("#container").offset().left,
+        y: e.pageY - $("#container").offset().top,
+      };
+      selectionBox = $("<div>")
+        .addClass("selection-box")
+        .appendTo("#container");
+    }
+  });
+
+  $("body").mousemove(function (e) {
+    if (startPoint && !draggingBox) {
+      const currentPoint = {
+        x: e.pageX - $("#container").offset().left,
+        y: e.pageY - $("#container").offset().top,
+      };
+      const left = Math.min(startPoint.x, currentPoint.x);
+      const top = Math.min(startPoint.y, currentPoint.y);
+      const width = Math.abs(startPoint.x - currentPoint.x);
+      const height = Math.abs(startPoint.y - currentPoint.y);
+      selectionBox.css({ left, top, width, height });
+    }
+  });
+
+  $("body").mouseup(function (e) {
+    if (startPoint && !draggingBox) {
+      const currentPoint = {
+        x: e.pageX - $("#container").offset().left,
+        y: e.pageY - $("#container").offset().top,
+      };
+      $(".resizable-box").each(function () {
+        const boxPosition = $(this).position();
+        const boxWidth = $(this).width();
+        const boxHeight = $(this).height();
+        const isOverlapping =
+          startPoint.x < boxPosition.left + boxWidth &&
+          currentPoint.x > boxPosition.left &&
+          startPoint.y < boxPosition.top + boxHeight &&
+          currentPoint.y > boxPosition.top;
+        if (isOverlapping) {
+          $(this).addClass("selected");
+        }
+      });
+      startPoint = null;
+      selectionBox.remove();
+    }
+  });
+
+  $("body").click(function (e) {
+    if ($(e.target).is("#containerOuter") || $(e.target).is("#container")) {
+      $(".resizable-box.selected").removeClass("selected");
+    }
+  });
+
+  $(document).keydown(function (e) {
+    if (e.key === "Delete") {
+      $(".resizable-box.selected").remove();
+      $(".selection-box").remove();
     }
   });
 
