@@ -151,3 +151,21 @@ body {
 .no-scroll {
   overflow: hidden !important;
 }
+
+.guide-line {
+  position: absolute;
+  z-index: 9999;
+  display: none;
+}
+
+.vertical-guide {
+  width: 2px;
+  height: 100%;
+  background-color: #ff0000;
+}
+
+.horizontal-guide {
+  height: 2px;
+  width: 100%;
+  background-color: #ff0000;
+}

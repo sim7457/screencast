@@ -100,33 +100,110 @@ $(document).ready(function () {
           .find(".size-display")
           .text(width + "px x " + height + "px");
         handleScroll(ui, "resize");
+
+        // Show and position the guide lines
+        $(".guide-line").hide(); // Hide existing guide lines
+        let $otherBoxes = $(".resizable-box").not($box); // Get all other boxes
+
+        $otherBoxes.each(function () {
+          let otherBoxPos = $(this).position();
+          let otherBoxWidth = $(this).width();
+          let otherBoxHeight = $(this).height();
+
+          // Check vertical alignment (left and right sides)
+          if (Math.abs(ui.position.left - otherBoxPos.left) <= 5) {
+            $(".vertical-guide")
+              .css("left", otherBoxPos.left + "px")
+              .show();
+          } else if (
+            Math.abs(
+              ui.position.left +
+                ui.size.width -
+                (otherBoxPos.left + otherBoxWidth)
+            ) <= 5
+          ) {
+            $(".vertical-guide")
+              .css("left", otherBoxPos.left + otherBoxWidth + "px")
+              .show();
+          }
+
+          // Check horizontal alignment (top and bottom sides)
+          if (Math.abs(ui.position.top - otherBoxPos.top) <= 5) {
+            $(".horizontal-guide")
+              .css("top", otherBoxPos.top + "px")
+              .show();
+          } else if (
+            Math.abs(
+              ui.position.top +
+                ui.size.height -
+                (otherBoxPos.top + otherBoxHeight)
+            ) <= 5
+          ) {
+            $(".horizontal-guide")
+              .css("top", otherBoxPos.top + otherBoxHeight + "px")
+              .show();
+          }
+        });
+        positionGuideLines(ui, "resize");
+      },
+      stop: function (event, ui) {
+        // Hide the guide lines when done resizing
+        $(".guide-line").hide();
       },
     });
+
+    function isOverlapping(box1, box2) {
+      return !(
+        box1.left > box2.right ||
+        box1.right < box2.left ||
+        box1.top > box2.bottom ||
+        box1.bottom < box2.top
+      );
+    }
 
     $box.draggable({
       containment: "#container",
       grid: [1, 1],
       drag: function (event, ui) {
         handleScroll(ui, "drag");
-      },
-      stop: function (event, ui) {
-        let pos = $(this).position();
-        let container = $("#container");
-        let boxWidth = $(this).width();
-        let boxHeight = $(this).height();
+        $(".vertical-guide, .horizontal-guide").hide();
+        positionGuideLines(ui, "drag");
 
-        if (pos.top < 0) {
-          $(this).css("top", "0px");
-        }
-        if (pos.left < 0) {
-          $(this).css("left", "0px");
-        }
-        if (pos.left + boxWidth > container.width()) {
-          $(this).css("left", container.width() - boxWidth + "px");
-        }
-        if (pos.top + boxHeight > container.height()) {
-          $(this).css("top", container.height() - boxHeight + "px");
-        }
+        $(".resizable-box")
+          .not(ui.helper)
+          .each(function () {
+            let currentBox = {
+              left: ui.position.left,
+              top: ui.position.top,
+              right: ui.position.left + $(ui.helper).width(),
+              bottom: ui.position.top + $(ui.helper).height(),
+            };
+
+            let otherBox = {
+              left: $(this).position().left,
+              top: $(this).position().top,
+              right: $(this).position().left + $(this).width(),
+              bottom: $(this).position().top + $(this).height(),
+            };
+
+            const snapTolerance = 5;
+
+            if (Math.abs(currentBox.right - otherBox.left) <= snapTolerance) {
+              ui.position.left = otherBox.left - $(ui.helper).width();
+            } else if (
+              Math.abs(currentBox.left - otherBox.right) <= snapTolerance
+            ) {
+              ui.position.left = otherBox.right;
+            }
+
+            if (Math.abs(currentBox.bottom - otherBox.top) <= snapTolerance) {
+              ui.position.top = otherBox.top - $(ui.helper).height();
+            } else if (
+              Math.abs(currentBox.top - otherBox.bottom) <= snapTolerance
+            ) {
+              ui.position.top = otherBox.bottom;
+            }
+          });
       },
     });
 
@@ -175,6 +252,91 @@ $(document).ready(function () {
     $box.find(".size-display").text(width + "px x " + height + "px");
   }
 
+  function positionGuideLines(ui, type) {
+    // 선택된 박스만 가이드라인이 보이도록 설정
+    if (!$(ui.helper).hasClass("selected")) return;
+
+    $(".guide-line").remove(); // Remove all existing guide lines
+
+    let $otherBoxes = $(".resizable-box").not(ui.helper);
+    let verticalGuides = new Set();
+    let horizontalGuides = new Set();
+
+    let boxWidth, boxHeight, boxTop, boxLeft;
+
+    if (type === "resize") {
+      boxWidth = ui.size.width;
+      boxHeight = ui.size.height;
+      boxTop = ui.position.top;
+      boxLeft = ui.position.left;
+    } else if (type === "drag") {
+      boxWidth = $(ui.helper).width();
+      boxHeight = $(ui.helper).height();
+      boxTop = ui.position.top;
+      boxLeft = ui.position.left;
+    }
+
+    const snapTolerance = 3;
+
+    const checkAlignment = (value, target, guides) => {
+      if (Math.abs(value - target) <= snapTolerance) {
+        guides.add(target);
+      }
+    };
+
+    $otherBoxes.each(function () {
+      let otherBoxPos = $(this).position();
+      let otherBoxWidth = $(this).width();
+      let otherBoxHeight = $(this).height();
+
+      // Vertical alignment checks
+      checkAlignment(boxLeft, otherBoxPos.left, verticalGuides);
+      checkAlignment(boxLeft + boxWidth, otherBoxPos.left, verticalGuides);
+      checkAlignment(boxLeft, otherBoxPos.left + otherBoxWidth, verticalGuides);
+      checkAlignment(
+        boxLeft + boxWidth,
+        otherBoxPos.left + otherBoxWidth,
+        verticalGuides
+      );
+
+      // Horizontal alignment checks
+      checkAlignment(boxTop, otherBoxPos.top, horizontalGuides);
+      checkAlignment(boxTop + boxHeight, otherBoxPos.top, horizontalGuides);
+      checkAlignment(
+        boxTop,
+        otherBoxPos.top + otherBoxHeight,
+        horizontalGuides
+      );
+      checkAlignment(
+        boxTop + boxHeight,
+        otherBoxPos.top + otherBoxHeight,
+        horizontalGuides
+      );
+    });
+
+    // Create and position the vertical guide lines
+    verticalGuides.forEach((guide) => {
+      $("<div>")
+        .addClass("guide-line vertical-guide")
+        .css({
+          left: guide + "px",
+        })
+        .appendTo("#container")
+        .show();
+    });
+
+    // Create and position the horizontal guide lines
+    horizontalGuides.forEach((guide) => {
+      $("<div>")
+        .addClass("guide-line horizontal-guide")
+        .css({
+          top: guide + "px",
+        })
+        .appendTo("#container")
+        .show();
+    });
+  }
+
   // 컨테이너 해상도 변경 이벤트
   $("#resolution").change(function () {
     const [width, height] = $(this).val().split("x");
@@ -206,12 +368,6 @@ $(document).ready(function () {
           height: "480px",
         });
         break;
-      case "360":
-        $("#container").css({
-          width: "640px",
-          height: "360px",
-        });
-        break;
       case "4k":
         $("#container").css({
           width: "3840px",
@@ -233,6 +389,11 @@ $(document).ready(function () {
     }
 
     if (e.ctrlKey && (e.key === "v" || e.key === "V") && copiedBox) {
+      const offset = 10;
+      copiedBox.css({
+        top: `+=${offset}px`,
+        left: `+=${offset}px`,
+      });
       $("#container").append(copiedBox);
       setupResizableDraggable(copiedBox, false);
       copiedBox.click(function () {
