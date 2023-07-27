@@ -22,8 +22,8 @@ body {
   position: relative;
 }
 #container {
-  width: 1920px;
-  height: 1080px;
+  width: 3840px;
+  height: 2160px;
   background-image: repeating-linear-gradient(
       0deg,
       transparent,
@@ -49,6 +49,7 @@ body {
   cursor: pointer;
   color: white;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .resizable-box.selected {
@@ -176,4 +177,12 @@ body {
   position: absolute;
   pointer-events: none;
   z-index: 9999;
+}
+#infoBox {
+  position: fixed;
+  right: 10px;
+  top: 10px;
+  padding: 10px;
+  border: 1px solid black;
+  background-color: #f7f7f7;
 }

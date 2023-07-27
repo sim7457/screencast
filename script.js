@@ -1,12 +1,14 @@
 $(document).ready(function () {
-  let boxCount = 0;
-  let copiedBox = null;
-  let selectedBox = null;
-  let selectionBox = null;
-  let startPoint = null;
-  let draggingBox = false;
+  let boxCount = 0; // 박스의 숫자를 추적
+  let copiedBox = null; // 복사한 박스를 저장
+  let selectedBox = null; // 현재 선택된 박스를 저장
+  let selectionBox = null; // 선택 영역을 위한 변수
+  let startPoint = null; // 드래그 시작점 저장 변수
+  let draggingBox = false; // 박스 드래그 상태 표시 변수
 
-  // 레이어 추가 버튼 이벤트
+  const BORDER_WIDTH = 2; // 박스의 테두리 너비
+
+  // 레이어 추가 버튼 클릭 이벤트
   $("#addLayer").click(() => addResizableBox(true));
 
   // 새로운 박스를 추가하는 함수
@@ -14,39 +16,40 @@ $(document).ready(function () {
     boxCount++;
     const alphabet = String.fromCharCode(64 + boxCount);
 
-    // 박스의 HTML 구조
+    // 박스의 HTML 구조 생성
     const $resizableBox = $(`
-                <div class="resizable-box" id="box${boxCount}">
-                    <div class="size-display"></div>
-                    <div class="box-center">${alphabet}</div>
-                </div>`);
+            <div class="resizable-box" id="box${boxCount}">
+                <div class="size-display"></div>
+                <div class="box-center">${alphabet}</div>
+            </div>`);
 
+    // 초기 박스 설정
     if (isInitial) {
       $resizableBox.css({
         top: "0",
         left: "0",
-        width: "300px",
-        height: "300px",
+        width: `298px`,
+        height: `298px`,
       });
       updateSizeDisplay($resizableBox);
     } else {
+      // 기본 박스 설정 (초기 설정이 아닐 때)
       let containerWidth = $("#container").width();
       let containerHeight = $("#container").height();
-      let boxWidth = 100;
-      let boxHeight = 100;
-      // 다른 박스들을 위해 기본 크기 설정 및 중앙에 배치
+      let boxWidth = 98;
+      let boxHeight = 98;
       $resizableBox.css({
         width: `${boxWidth}px`,
         height: `${boxHeight}px`,
         top: `${(containerHeight - boxHeight) / 2}px`,
         left: `${(containerWidth - boxWidth) / 2}px`,
       });
+      updateSizeDisplay($resizableBox);
     }
     $("#container").append($resizableBox);
     setupResizableDraggable($resizableBox, isInitial);
-    updateSizeDisplay($resizableBox);
   }
-
+  // 스크롤 이벤트 핸들러: 박스 크기 조절 또는 드래그 중 스크롤 처리
   function handleScroll(ui, actionType) {
     const sensitivity = 50;
     const scrollSpeed = 15;
@@ -93,6 +96,10 @@ $(document).ready(function () {
       grid: [1, 1],
       handles: "n, e, s, w, ne, se, sw, nw",
       resize: function (event, ui) {
+        // infoBox 및 size-display의 크기를 실시간으로 업데이트
+        $("#boxWidth").val(ui.size.width + 4); // 테두리 크기 고려
+        $("#boxHeight").val(ui.size.height + 4); // 테두리 크기 고려
+
         const width = Math.round(ui.size.width);
         const height = Math.round(ui.size.height);
         $(ui.element)
@@ -149,9 +156,22 @@ $(document).ready(function () {
         });
         positionGuideLines(ui, "resize");
       },
+      start: function (event, ui) {
+        // 활성화된 박스만 크기를 조절할 수 있도록 체크
+        if (!$(this).hasClass("selected")) {
+          return false;
+        }
+      },
       stop: function (event, ui) {
         // Hide the guide lines when done resizing
         $(".guide-line").hide();
+      },
+      if(isInitial) {
+        $box.css({
+          width: "298px", // 테두리 크기 고려해서 조정
+          height: "298px", // 테두리 크기 고려해서 조정
+        });
+        updateSizeDisplay($box);
       },
     });
 
@@ -167,10 +187,16 @@ $(document).ready(function () {
     $box.draggable({
       containment: "#container",
       grid: [1, 1],
+      snap: ".guide-line",
+      snapMode: "inner",
+
       drag: function (event, ui) {
         handleScroll(ui, "drag");
         $(".vertical-guide, .horizontal-guide").hide();
         positionGuideLines(ui, "drag");
+        // infoBox의 위치를 실시간으로 업데이트
+        $("#boxX").val(ui.position.left + 2); // 테두리 크기 고려
+        $("#boxY").val(ui.position.top + 2); // 테두리 크기 고려
 
         $(".resizable-box")
           .not(ui.helper)
@@ -208,6 +234,12 @@ $(document).ready(function () {
             }
           });
       },
+      start: function (event, ui) {
+        // 활성화된 박스만 움직일 수 있도록 체크
+        if (!$(this).hasClass("selected")) {
+          return false;
+        }
+      },
     });
 
     // 초기 박스가 올바른 치수를 가지도록 보장
@@ -220,7 +252,7 @@ $(document).ready(function () {
     }
   }
 
-  // 클릭할 때 박스를 선택하는 이벤트
+  // 박스를 클릭할 때 infoBox 업데이트
   $("#container").on("click", ".resizable-box", function (e) {
     e.stopPropagation();
 
@@ -230,26 +262,43 @@ $(document).ready(function () {
 
     selectedBox = $(this);
     selectedBox.addClass("selected");
+
+    // infoBox에 박스의 현재 위치와 크기 정보를 가져옵니다.
+    $("#boxX").val(parseInt(selectedBox.css("left")) + 2);
+    $("#boxY").val(parseInt(selectedBox.css("top")) + 2);
+    $("#boxWidth").val(selectedBox.width() + 4);
+    $("#boxHeight").val(selectedBox.height() + 4);
   });
 
-  // 이 이벤트 리스너는 박스의 선택을 취소하기 위한 배경 클릭을 처리합니다
-  $("#container").on("click", function (e) {
-    if (e.target === this && selectedBox) {
-      selectedBox.removeClass("selected");
-      selectedBox = null;
+  // infoBox의 입력 값이 변경되었을 때, 박스 및 size-display 업데이트
+  $("#boxX, #boxY, #boxWidth, #boxHeight").on("input", function () {
+    if (selectedBox) {
+      const x = parseInt($("#boxX").val(), 10) - 2; // 테두리 크기 고려
+      const y = parseInt($("#boxY").val(), 10) - 2; // 테두리 크기 고려
+      const width = parseInt($("#boxWidth").val(), 10) - 4; // 테두리 크기 고려
+      const height = parseInt($("#boxHeight").val(), 10) - 4; // 테두리 크기 고려
+
+      selectedBox.css({
+        top: y + "px",
+        left: x + "px",
+        width: width + "px",
+        height: height + "px",
+      });
+
+      selectedBox
+        .find(".size-display")
+        .text(width + 4 + "px x " + (height + 4) + "px"); // 테두리 크기 고려
     }
   });
 
-  // 박스 크기를 표시하고 그리드에 맞게 크기 조절
+  // 일관성을 위해 updateSizeDisplay 함수를 업데이트했습니다.
   function updateSizeDisplay($box) {
-    let width = Math.round($box.width());
-    let height = Math.round($box.height());
-    width = width - (width % 1);
-    height = height - (height % 1);
+    let width = Math.round($box.width()) + 4;
+    let height = Math.round($box.height()) + 4;
 
     $box.css({
-      width: `${width}px`,
-      height: `${height}px`,
+      width: `${width - 4}px`, // 테두리를 조정합니다.
+      height: `${height - 4}px`, // 테두리를 조정합니다.
     });
 
     $box.find(".size-display").text(width + "px x " + height + "px");
@@ -344,20 +393,30 @@ $(document).ready(function () {
 
         let boxLeft = ui.position.left;
         let boxTop = ui.position.top;
+        let boxRight = boxLeft + $(ui.helper).width();
+        let boxBottom = boxTop + $(ui.helper).height();
 
-        $(".vertical-guide").each(function () {
-          let guideLeft = $(this).position().left;
-          if (Math.abs(boxLeft - guideLeft) <= snapTolerance) {
-            ui.position.left = guideLeft;
-          }
-        });
+        $(".resizable-box")
+          .not(ui.helper)
+          .each(function () {
+            let otherBoxLeft = $(this).position().left;
+            let otherBoxTop = $(this).position().top;
+            let otherBoxRight = otherBoxLeft + $(this).width();
+            let otherBoxBottom = otherBoxTop + $(this).height();
 
-        $(".horizontal-guide").each(function () {
-          let guideTop = $(this).position().top;
-          if (Math.abs(boxTop - guideTop) <= snapTolerance) {
-            ui.position.top = guideTop;
-          }
-        });
+            if (Math.abs(boxRight - otherBoxLeft) <= snapTolerance) {
+              ui.position.left = otherBoxLeft - $(ui.helper).width();
+            }
+            if (Math.abs(boxLeft - otherBoxRight) <= snapTolerance) {
+              ui.position.left = otherBoxRight;
+            }
+            if (Math.abs(boxBottom - otherBoxTop) <= snapTolerance) {
+              ui.position.top = otherBoxTop - $(ui.helper).height();
+            }
+            if (Math.abs(boxTop - otherBoxBottom) <= snapTolerance) {
+              ui.position.top = otherBoxBottom;
+            }
+          });
       },
     });
   }
