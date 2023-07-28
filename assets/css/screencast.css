@@ -176,7 +176,7 @@ body {
   background-color: rgba(0, 0, 0, 0.8);
   position: absolute;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 9998;
 }
 #infoBox {
   position: fixed;
