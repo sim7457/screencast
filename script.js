@@ -14,8 +14,8 @@ $(document).ready(function () {
   $("#addLayer").click(() => addResizableBox(true));
 
   function updateSizeDisplay($box) {
-    const width = $box.width();
-    const height = $box.height();
+    const width = $box.outerWidth();
+    const height = $box.outerHeight();
     $box.find(".size-display").text(width + "px x " + height + "px");
   }
 
@@ -115,11 +115,11 @@ $(document).ready(function () {
       handles: "n, e, s, w, ne, se, sw, nw",
       snap: ".resizable-box, .guide-line",
       snapMode: "both",
-      snapTolerance: 10,
+      snapTolerance: 5,
       resize: function (event, ui) {
         // 박스 크기 조절 중 실행되는 함수
-        $("#boxWidth").val(ui.size.width + 4);
-        $("#boxHeight").val(ui.size.height + 4);
+        $("#boxWidth").val(ui.size.width);
+        $("#boxHeight").val(ui.size.height);
         const width = Math.round(ui.size.width);
         const height = Math.round(ui.size.height);
         $(ui.element)
@@ -154,7 +154,7 @@ $(document).ready(function () {
       snap: ".guide-line",
       snapMode: "both",
       snap: ".resizable-box, .guide-line",
-      snapTolerance: 10,
+      snapTolerance: 5,
       drag: function (event, ui) {
         // 박스 드래그 중 실행되는 함수
         handleScroll(ui, "drag");
@@ -330,7 +330,7 @@ $(document).ready(function () {
         .show()
         .draggable({
           snap: ".resizable-box, .guide-line",
-          snapTolerance: 15,
+          snapTolerance: 5,
         });
     });
 
@@ -343,7 +343,7 @@ $(document).ready(function () {
         .show()
         .draggable({
           snap: ".resizable-box, .guide-line",
-          snapTolerance: 15,
+          snapTolerance: 5,
         });
     });
   }
@@ -477,6 +477,12 @@ $(document).ready(function () {
 
       $(".resizable-box.selected").remove();
       $(".selection-box").remove();
+
+      // 모든 박스가 삭제되었는지 확인합니다.
+      if ($(".resizable-box").length === 0) {
+        boxCount = 0; // 박스 카운트를 초기화합니다.
+        deletedAlphabets = []; // 삭제된 알파벳 배열도 초기화합니다.
+      }
     }
   });
 
