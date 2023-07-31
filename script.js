@@ -134,6 +134,15 @@ $(document).ready(function () {
         // 가이드라인 표시 및 위치 설정
         $(".guide-line").hide();
         positionGuideLines(ui, "resize");
+
+        // 박스 내부의 미디어 크기 조절
+        const mediaElem = $(ui.element).find("video, img");
+        if (mediaElem.length) {
+          mediaElem.css({
+            width: ui.size.width + "px",
+            height: ui.size.height + "px",
+          });
+        }
       },
       start: function (event, ui) {
         // 크기 조절 시작 시 실행되는 함수
@@ -211,6 +220,36 @@ $(document).ready(function () {
       selectedBox.height() +
         (selectedBox.hasClass("selected") ? 2 * BORDER_WIDTH : 0)
     );
+    if (!$(this).data("media-loaded")) {
+      $('<input type="file" accept="video/*,image/*">')
+        .on("change", function (event) {
+          const file = event.target.files[0];
+          if (file) {
+            if (file.type.startsWith("video/")) {
+              const videoElem = $(
+                '<video controls autoplay loop muted style="width: 100%; height: 100%; object-fit: cover;"></video>'
+              );
+              videoElem.attr("src", URL.createObjectURL(file));
+              selectedBox.append(videoElem);
+            } else if (file.type.startsWith("image/")) {
+              const imgElem = $(
+                '<img style="width: 100%; height: 100%; object-fit: contain;">'
+              );
+              imgElem.attr("src", URL.createObjectURL(file));
+              selectedBox.append(imgElem);
+            }
+            const deleteBtn = $("<button>Delete Media</button>");
+            deleteBtn.click(function () {
+              selectedBox.find("video, img").remove();
+              $(this).remove();
+              selectedBox.data("media-loaded", false);
+            });
+            selectedBox.append(deleteBtn);
+            selectedBox.data("media-loaded", true); // 미디어가 로드됐다고 표시
+          }
+        })
+        .click();
+    }
   });
 
   // infoBox 입력 값 변경 이벤트 처리
@@ -493,6 +532,15 @@ $(document).ready(function () {
       boxCount++;
       copiedBox.attr("id", "box" + boxCount);
       copiedBox.find(".box-center").text(String.fromCharCode(64 + boxCount));
+
+      // 미디어 로드 상태를 복사합니다.
+      if (copiedBox.data("media-loaded")) {
+        copiedBox.find("button").click(function () {
+          copiedBox.find("video, img").remove();
+          $(this).remove();
+          copiedBox.data("media-loaded", false);
+        });
+      }
     }
 
     if (e.ctrlKey && (e.key === "v" || e.key === "V") && copiedBox) {
@@ -503,14 +551,59 @@ $(document).ready(function () {
       });
       $("#container").append(copiedBox);
       setupResizableDraggable(copiedBox, false);
-      copiedBox.click(function () {
+
+      copiedBox.off("click"); // 기존의 클릭 이벤트를 제거합니다.
+      copiedBox.on("click", function (e) {
+        e.stopPropagation();
         if (selectedBox) {
           selectedBox.removeClass("selected");
         }
         selectedBox = $(this);
         selectedBox.addClass("selected");
+
+        // 박스 정보 업데이트
+        $("#boxX").val(parseInt(selectedBox.css("left")));
+        $("#boxY").val(parseInt(selectedBox.css("top")));
+        $("#boxWidth").val(
+          selectedBox.width() +
+            (selectedBox.hasClass("selected") ? 2 * BORDER_WIDTH : 0)
+        );
+        $("#boxHeight").val(
+          selectedBox.height() +
+            (selectedBox.hasClass("selected") ? 2 * BORDER_WIDTH : 0)
+        );
+        if (!$(this).data("media-loaded")) {
+          $('<input type="file" accept="video/*,image/*">')
+            .on("change", function (event) {
+              const file = event.target.files[0];
+              if (file) {
+                if (file.type.startsWith("video/")) {
+                  const videoElem = $(
+                    '<video controls autoplay loop muted style="width: 100%; height: 100%; object-fit: cover;"></video>'
+                  );
+                  videoElem.attr("src", URL.createObjectURL(file));
+                  selectedBox.append(videoElem);
+                } else if (file.type.startsWith("image/")) {
+                  const imgElem = $(
+                    '<img style="width: 100%; height: 100%; object-fit: contain;">'
+                  );
+                  imgElem.attr("src", URL.createObjectURL(file));
+                  selectedBox.append(imgElem);
+                }
+                const deleteBtn = $("<button>Delete Media</button>");
+                deleteBtn.click(function () {
+                  selectedBox.find("video, img").remove();
+                  $(this).remove();
+                  selectedBox.data("media-loaded", false);
+                });
+                selectedBox.append(deleteBtn);
+                selectedBox.data("media-loaded", true); // 미디어가 로드됐다고 표시
+              }
+            })
+            .click();
+        }
       });
-      copiedBox = null;
+      copiedBox = null; // 복사된 박스 초기화
     }
 
     if (e.key === "Delete") {
