@@ -186,3 +186,49 @@ body {
   border: 1px solid black;
   background-color: #f7f7f7;
 }
+
+.delete-media-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  outline: none;
+}
+
+.delete-media-btn:hover {
+  background-color: rgba(0, 0, 0, 1);
+}
+
+.upload-btn {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 5px;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+
+  position: absolute;
+  top: 65%;
+  left: 50%;
+  transform: translate(-50%, -65%);
+}
+
+.upload-btn:hover {
+  background-color: #2980b9;
+}
