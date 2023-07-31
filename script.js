@@ -25,6 +25,15 @@ $(document).ready(function () {
       selectedBox = null;
     }
   }
+  function setupDeleteButton($box) {
+    const $deleteBtn = $box.find(".delete-media-btn");
+    $deleteBtn.click(function () {
+      $box.find("video, img").remove();
+      $(this).remove();
+      $box.data("media-loaded", false);
+      addUploadButton($box);
+    });
+  }
 
   function addUploadButton($box) {
     // 박스 내에 이미 'Upload Media' 버튼이 있는지 확인
@@ -575,6 +584,11 @@ $(document).ready(function () {
       });
       $("#container").append(copiedBox);
 
+      // 복사한 박스에 'Upload Media' 버튼 추가
+      if (!copiedBox.data("media-loaded")) {
+        addUploadButton(copiedBox);
+      }
+
       // 복사된 박스에서 'Upload Media' 버튼 제거
       copiedBox.find('button:contains("Upload Media")').remove();
 
@@ -619,6 +633,9 @@ $(document).ready(function () {
             (selectedBox.hasClass("selected") ? 2 * BORDER_WIDTH : 0)
         );
       });
+
+      // 복사한 박스의 삭제 버튼 이벤트 설정
+      setupDeleteButton(copiedBox);
 
       copiedBox = null; // 복사된 박스 초기화
     }
