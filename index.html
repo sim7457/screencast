@@ -16,13 +16,30 @@
   </head>
   <body>
     <div id="containerOuter">
-      <div id="viewport">
-        <div id="container">
-          <!-- Resizable boxes will be added here -->
-          <div class="guide-line horizontal-guide"></div>
-          <div class="guide-line vertical-guide"></div>
+      <div id="viewportWrapper">
+        <div id="viewport">
+          <!-- 크기 조절을 위한 입력 부분 -->
+          <div id="container">
+            <!-- Resizable boxes will be added here -->
+            <div class="guide-line horizontal-guide"></div>
+            <div class="guide-line vertical-guide"></div>
+          </div>
         </div>
       </div>
+
+      <div class="controls">
+        <label for="width">Width:</label>
+        <input type="number" id="width" placeholder="Width in px" />
+
+        <label for="height">Height:</label>
+        <input type="number" id="height" placeholder="Height in px" />
+
+        <button id="setSize">Set Size</button>
+
+        <label for="zoom">Zoom:</label>
+        <input type="range" id="zoom" min="10" max="200" value="100" />
+      </div>
+
       <div id="infoBox">
         <h3>Box Information</h3>
         <label>X: <input type="number" id="boxX" /></label>

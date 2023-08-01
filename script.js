@@ -35,13 +35,35 @@ $(document).ready(function () {
     });
   }
 
+  function duplicateBox($originalBox) {
+    const $clonedBox = $originalBox.clone(true); // 박스를 복제합니다.
+    $clonedBox.insertAfter($originalBox); // 원래 박스 바로 다음에 복제된 박스를 삽입합니다.
+
+    // 복제된 박스 내의 미디어와 'X' 버튼을 제거합니다.
+    $clonedBox.find("video, img, .delete-media-btn").remove();
+
+    // 클론된 박스의 미디어 데이터 초기화
+    $clonedBox.data("media-loaded", false);
+    // 클론된 박스를 원래 박스 뒤에 삽입
+    $originalBox.after($clonedBox);
+
+    if (!$clonedBox.data("media-loaded")) {
+      addUploadButton($clonedBox);
+    }
+  }
+
+  $(document).on("click", ".duplicate-btn", function () {
+    const $parentBox = $(this).closest(".box");
+    duplicateBox($parentBox);
+  });
+
   function addUploadButton($box) {
-    // 박스 내에 이미 'Upload Media' 버튼이 있는지 확인
-    if ($box.find('button:contains("Upload Media")').length > 0) {
-      return; // 이미 버튼이 있으면 함수를 종료
+    if ($box.find("video, img, .upload-btn").length > 0) {
+      return; // 박스 내에 미디어가 이미 있으면 함수를 종료
     }
 
     const uploadBtn = $("<button class='upload-btn'>Upload Media</button>");
+    uploadBtn.off("click"); // 기존의 클릭 이벤트 리스너 제거
     uploadBtn.click(function () {
       $('<input type="file" accept="video/*,image/*">')
         .on("change", function (event) {
@@ -49,13 +71,13 @@ $(document).ready(function () {
           if (file) {
             if (file.type.startsWith("video/")) {
               const videoElem = $(
-                '<video controls autoplay loop muted style="width: 100%; height: 100%; object-fit: cover;"></video>'
+                '<video autoplay loop muted style="width: 100%; height: 100%; object-fit: cover;"></video>'
               );
               videoElem.attr("src", URL.createObjectURL(file));
               $box.append(videoElem);
             } else if (file.type.startsWith("image/")) {
               const imgElem = $(
-                '<img style="width: 100%; height: 100%; object-fit: contain;">'
+                '<img style="width: 100%; height: 100%; object-fit: cover;">'
               );
               imgElem.attr("src", URL.createObjectURL(file));
               $box.append(imgElem);
@@ -76,7 +98,6 @@ $(document).ready(function () {
     });
     $box.append(uploadBtn);
   }
-
   // 새로운 박스를 추가하는 함수입니다.
   function addResizableBox(isInitial = false) {
     boxCount++;
@@ -583,61 +604,14 @@ $(document).ready(function () {
         left: `+=${offset}px`,
       });
       $("#container").append(copiedBox);
+      setupResizableDraggable(copiedBox, false);
 
-      // 복사한 박스에 'Upload Media' 버튼 추가
       if (!copiedBox.data("media-loaded")) {
         addUploadButton(copiedBox);
       }
 
-      // 복사된 박스에서 'Upload Media' 버튼 제거
-      copiedBox.find('button:contains("Upload Media")').remove();
-
-      setupResizableDraggable(copiedBox, false);
-      // 복사한 박스 내의 삭제 버튼에 이벤트 바인딩
-      setupDeleteMediaButton(
-        copiedBox,
-        copiedBox.find('button:contains("Delete Media")')
-      );
-
-      // // 복사한 박스에 업로드 버튼 추가
-      // if (!copiedBox.data("media-loaded")) {
-      //   addUploadButton(copiedBox);
-      // }
-
-      // 복사한 박스 내의 삭제 버튼에 이벤트 바인딩
-      copiedBox.find('button:contains("Delete Media")').click(function () {
-        copiedBox.find("video, img").remove();
-        $(this).remove();
-        copiedBox.data("media-loaded", false);
-        addUploadButton(copiedBox); // 미디어가 삭제된 후 다시 업로드 버튼을 추가합니다.
-      });
-
-      copiedBox.off("click");
-      copiedBox.on("click", function (e) {
-        e.stopPropagation();
-        if (selectedBox) {
-          selectedBox.removeClass("selected");
-        }
-        selectedBox = $(this);
-        selectedBox.addClass("selected");
-
-        // 박스 정보 업데이트
-        $("#boxX").val(parseInt(selectedBox.css("left")));
-        $("#boxY").val(parseInt(selectedBox.css("top")));
-        $("#boxWidth").val(
-          selectedBox.width() +
-            (selectedBox.hasClass("selected") ? 2 * BORDER_WIDTH : 0)
-        );
-        $("#boxHeight").val(
-          selectedBox.height() +
-            (selectedBox.hasClass("selected") ? 2 * BORDER_WIDTH : 0)
-        );
-      });
-
-      // 복사한 박스의 삭제 버튼 이벤트 설정
       setupDeleteButton(copiedBox);
-
-      copiedBox = null; // 복사된 박스 초기화
+      copiedBox = null;
     }
 
     if (e.key === "Delete") {

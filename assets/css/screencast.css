@@ -50,6 +50,8 @@ body {
   color: white;
   z-index: 10;
   box-sizing: border-box;
+
+  overflow: hidden;
 }
 
 .resizable-box.selected {
@@ -181,6 +183,14 @@ body {
 #infoBox {
   position: fixed;
   right: 10px;
+  top: 10px;
+  padding: 10px;
+  border: 1px solid black;
+  background-color: #f7f7f7;
+}
+.controls {
+  position: fixed;
+  left: 10px;
   top: 10px;
   padding: 10px;
   border: 1px solid black;
