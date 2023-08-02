@@ -58,12 +58,11 @@ $(document).ready(function () {
   });
 
   function addUploadButton($box) {
-    if ($box.find("video, img").length > 0) {
+    if ($box.find("video, img, btn").length > 0) {
       return; // 박스 내에 미디어가 이미 있으면 함수를 종료
     }
 
     const uploadBtn = $("<button class='upload-btn'>Upload Media</button>");
-    $box.append(uploadBtn); // First, add the button to the DOM
     uploadBtn.click(function () {
       $('<input type="file" accept="video/*,image/*">')
         .on("change", function (event) {
@@ -91,7 +90,8 @@ $(document).ready(function () {
             });
             $box.append(deleteBtn);
             $box.data("media-loaded", true); // 미디어가 로드됐다고 표시
-            uploadBtn.remove(); // 업로드 버튼을 제거합니다.
+            uploadBtn.remove();
+            $box.find(".upload-btn").remove(); // 업로드 버튼을 제거합니다.
           }
         })
         .click();
