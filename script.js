@@ -58,12 +58,12 @@ $(document).ready(function () {
   });
 
   function addUploadButton($box) {
-    if ($box.find("video, img, .upload-btn").length > 0) {
+    if ($box.find("video, img").length > 0) {
       return; // 박스 내에 미디어가 이미 있으면 함수를 종료
     }
 
     const uploadBtn = $("<button class='upload-btn'>Upload Media</button>");
-    uploadBtn.off("click"); // 기존의 클릭 이벤트 리스너 제거
+    $box.append(uploadBtn); // First, add the button to the DOM
     uploadBtn.click(function () {
       $('<input type="file" accept="video/*,image/*">')
         .on("change", function (event) {
