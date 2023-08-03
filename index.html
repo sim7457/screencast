@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko" dir="ltr" data-theme="light">
   <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
-
     <link href="assets/css/ltr-core.css" rel="stylesheet" />
     <link href="assets/css/ltr-vendor.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
@@ -15,47 +13,29 @@
     <title>JSIGN</title>
   </head>
   <body>
-    <div id="containerOuter">
-      <div id="viewportWrapper">
-        <div id="viewport">
-          <!-- 크기 조절을 위한 입력 부분 -->
-          <div id="container">
-            <!-- Resizable boxes will be added here -->
-            <div class="guide-line horizontal-guide"></div>
-            <div class="guide-line vertical-guide"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="controls">
-        <label for="width">Width:</label>
-        <input type="number" id="width" placeholder="Width in px" />
-
-        <label for="height">Height:</label>
-        <input type="number" id="height" placeholder="Height in px" />
-
-        <button id="setSize">Set Size</button>
-
-        <label for="zoom">Zoom:</label>
-        <input type="range" id="zoom" min="10" max="200" value="100" />
-      </div>
-
-      <div id="infoBox">
-        <h3>Box Information</h3>
-        <label>X: <input type="number" id="boxX" /></label>
-        <label>Y: <input type="number" id="boxY" /></label>
-        <label>Width: <input type="number" id="boxWidth" /></label>
-        <label>Height: <input type="number" id="boxHeight" /></label>
-      </div>
-      <button id="addLayer">Add Layer</button>
-      <select id="resolutionDropdown">
-        <option value="4k">3840x2160 (4K)</option>
-        <option value="1080">1920x1080 (FHD)</option>
-        <option value="720">1280x720 (HD)</option>
-        <option value="480">720x480 (SD)</option>
-      </select>
+    <div id="zoomPercentage">100%</div>
+    <div id="container">
+      <div id="layer" style="width: 1920px; height: 1080px"></div>
+      <div class="guide-line horizontal-guide"></div>
+      <div class="guide-line vertical-guide"></div>
     </div>
-
+    <input id="widthInput" type="text" placeholder="Width (e.g., 4000)" />
+    <input id="heightInput" type="text" placeholder="Height (e.g., 4000)" />
+    <button onclick="resizeLayer()">Apply</button>
+    <div id="infoBox">
+      <h3>Box Information</h3>
+      <label>X: <input type="number" id="boxX" /></label>
+      <label>Y: <input type="number" id="boxY" /></label>
+      <label>Width: <input type="number" id="boxWidth" /></label>
+      <label>Height: <input type="number" id="boxHeight" /></label>
+    </div>
+    <button id="addLayer">Add Layer</button>
+    <select id="resolutionDropdown">
+      <option value="4k">3840x2160 (4K)</option>
+      <option value="1080">1920x1080 (FHD)</option>
+      <option value="720">1280x720 (HD)</option>
+      <option value="480">720x480 (SD)</option>
+    </select>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script src="script.js"></script>

@@ -621,3 +621,69 @@ $(document).ready(function () {
 
   addResizableBox(true);
 });
+
+let isCtrlPressed = false;
+let zoomLevel = 1;
+
+$(document).keydown(function (e) {
+  if (e.key === "Control") {
+    isCtrlPressed = true;
+  }
+});
+
+$(document).keyup(function (e) {
+  if (e.key === "Control") {
+    isCtrlPressed = false;
+  }
+});
+
+$("#container").on("mousewheel", function (e) {
+  if (isCtrlPressed) {
+    e.preventDefault();
+
+    // Adjust zoom level by 0.05 (5%) based on mousewheel direction for smoother zooming
+    zoomLevel += e.originalEvent.deltaY > 0 ? -0.05 : 0.05;
+
+    // Set a minimum and maximum zoom level
+    if (zoomLevel < 0.02) zoomLevel = 0.02;
+    if (zoomLevel > 3) zoomLevel = 3;
+
+    $(this).css("transform", `translate(-50%, -50%) scale(${zoomLevel})`);
+    $("#zoomPercentage").text(`${(zoomLevel * 100).toFixed(0)}%`);
+  }
+});
+
+$("#widthInput, #heightInput").change(function () {
+  const newWidth = $("#widthInput").val();
+  const newHeight = $("#heightInput").val();
+
+  $("#layer").css({
+    width: newWidth + "px",
+    height: newHeight + "px",
+  });
+
+  fitLayerToScreen();
+});
+
+function fitLayerToScreen() {
+  const viewportWidth = $(window).width();
+  const viewportHeight = $(window).height();
+
+  const layerWidth = $("#layer").outerWidth();
+  const layerHeight = $("#layer").outerHeight();
+
+  // Calculate the scale required to fit the layer within the viewport
+  const scaleWidth = (viewportWidth * 0.85) / layerWidth; // Adjusted to 85% for more centering
+  const scaleHeight = (viewportHeight * 0.85) / layerHeight; // Adjusted to 85% for more centering
+
+  zoomLevel = Math.min(scaleWidth, scaleHeight);
+  if (zoomLevel > 1) zoomLevel = 1; // Ensure that the layer isn't zoomed in more than its original size
+
+  $("#container").css("transform", `translate(-50%, -50%) scale(${zoomLevel})`);
+  $("#zoomPercentage").text(`${(zoomLevel * 100).toFixed(0)}%`);
+}
+
+// Initial fitting when the page loads
+$(document).ready(function () {
+  fitLayerToScreen();
+});
