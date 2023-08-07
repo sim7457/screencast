@@ -6,6 +6,7 @@ $(document).ready(function () {
   let selectionBox = null; // 선택 영역을 위한 변수입니다.
   let startPoint = null; // 드래그 시작점 저장 변수입니다.
   let draggingBox = false; // 박스 드래그 상태 표시 변수입니다.
+  let zoomLevel = 1; // 줌 레벨을 추적합니다.
   let deletedAlphabets = []; // 삭제된 알파벳을 추적하기 위한 배열입니다.
 
   const BORDER_WIDTH = 2; // 박스의 테두리 너비입니다.
@@ -62,6 +63,7 @@ $(document).ready(function () {
       return; // 박스 내에 미디어가 이미 있으면 함수를 종료
     }
 
+    // 미디어 업로드 버튼 추가
     const uploadBtn = $("<button class='upload-btn'>Upload Media</button>");
     uploadBtn.click(function () {
       $('<input type="file" accept="video/*,image/*">')
@@ -454,7 +456,7 @@ $(document).ready(function () {
   // 컨테이너 해상도 변경 이벤트
   $("#resolution").change(function () {
     const [width, height] = $(this).val().split("x");
-    $("#container").css({
+    $("#layer").css({
       width: `${width}px`,
       height: `${height}px`,
     });
@@ -465,25 +467,25 @@ $(document).ready(function () {
     const resolution = $(this).val();
     switch (resolution) {
       case "1080":
-        $("#container").css({
+        $("#layer").css({
           width: "1920px",
           height: "1080px",
         });
         break;
       case "720":
-        $("#container").css({
+        $("#layer").css({
           width: "1280px",
           height: "720px",
         });
         break;
       case "480":
-        $("#container").css({
-          width: "854px",
+        $("#layer").css({
+          width: "720px",
           height: "480px",
         });
         break;
       case "4k":
-        $("#container").css({
+        $("#layer").css({
           width: "3840px",
           height: "2160px",
         });
@@ -648,7 +650,10 @@ $("#container").on("mousewheel", function (e) {
     if (zoomLevel < 0.02) zoomLevel = 0.02;
     if (zoomLevel > 3) zoomLevel = 3;
 
-    $(this).css("transform", `translate(-50%, -50%) scale(${zoomLevel})`);
+    $("#container").css(
+      "transform",
+      `translate(-50%, -50%) scale(${zoomLevel})`
+    );
     $("#zoomPercentage").text(`${(zoomLevel * 100).toFixed(0)}%`);
   }
 });
@@ -665,6 +670,7 @@ $("#widthInput, #heightInput").change(function () {
   fitLayerToScreen();
 });
 
+// 레이어를 화면에 맞게 조절하는 함수
 function fitLayerToScreen() {
   const viewportWidth = $(window).width();
   const viewportHeight = $(window).height();
@@ -686,4 +692,195 @@ function fitLayerToScreen() {
 // Initial fitting when the page loads
 $(document).ready(function () {
   fitLayerToScreen();
+});
+
+$("#resolutionDropdown").change(function () {
+  const selectedResolution = $(this).val();
+  let newWidth, newHeight;
+
+  switch (selectedResolution) {
+    case "4k":
+      newWidth = 3840;
+      newHeight = 2160;
+      break;
+    case "1080":
+      newWidth = 1920;
+      newHeight = 1080;
+      break;
+    case "720":
+      newWidth = 1280;
+      newHeight = 720;
+      break;
+    case "480":
+      newWidth = 720;
+      newHeight = 480;
+      break;
+  }
+
+  $("#widthInput").val(newWidth);
+  $("#heightInput").val(newHeight);
+
+  $("#layer").css({
+    width: newWidth + "px",
+    height: newHeight + "px",
+  });
+
+  fitLayerToScreen();
+});
+
+// 레이어를 컨테이너 내에서 드래그 가능하게 합니다
+// Making the layer draggable within the container
+$("#layer").draggable({
+  containment: "#container",
+});
+
+// 수정 사항: 줌 기능이 #container 내에서 작동하도록 변경하였습니다.
+// 변환의 번역 부분을 원래대로 변경하여 요소가 화면 중앙에 위치하도록 하였습니다.
+
+// .flex_web_left 박스 위에 있을 때 컨트롤 휠 클릭으로 레이어 크기를 줄이거나 늘립니다.
+$(".flex_web_left").on("mousewheel", function (e) {
+  if (e.ctrlKey) {
+    e.preventDefault(); // 기본 줌 동작을 막습니다.
+
+    // 휠을 위로 스크롤하면 줌 인, 아래로 스크롤하면 줌 아웃합니다.
+    if (e.originalEvent.deltaY < 0) {
+      zoomLevel += 0.05;
+    } else {
+      zoomLevel -= 0.05;
+    }
+
+    // .flex_web_left의 변환을 적용하여 줌을 조정합니다.
+    $(".flex_web_left").css("transform", `scale(${zoomLevel})`);
+    $("#zoomPercentage").text(Math.round(zoomLevel * 100) + "%"); // 줌 비율을 표시합니다.
+  }
+});
+
+// .flex_web_left 박스 위에서 컨트롤 키와 함께 휠 클릭으로 홈페이지의 기본 확대/축소 기능을 막습니다.
+$(".flex_web_left").on("mousewheel", function (e) {
+  if (e.ctrlKey && !$(e.target).closest("#layer").length) {
+    e.preventDefault(); // 레이어 외의 영역에서 컨트롤 키와 함께 휠 클릭 시 기본 줌 동작을 막습니다.
+  }
+});
+
+// 레이어 사이즈에 맞게 표시합니다.
+function fitLayerSize() {
+  const containerWidth = $(".flex_web_left").width();
+  const containerHeight = $(".flex_web_left").height();
+  const layerWidth = $("#layer").width();
+  const layerHeight = $("#layer").height();
+
+  // 컨테이너와 레이어의 크기를 비교하여 적절한 스케일을 계산합니다.
+  const scaleWidth = containerWidth / layerWidth;
+  const scaleHeight = containerHeight / layerHeight;
+  const scale = Math.min(scaleWidth, scaleHeight) * 0.9; // 여유 공간을 두기 위해 0.9를 곱합니다.
+
+  // 스케일을 적용합니다.
+  $("#container").css("transform", `scale(${scale})`);
+  $("#zoomPercentage").text(Math.round(scale * 100) + "%"); // 줌 비율을 표시합니다.
+}
+
+// 레이어 드래그 기능을 위한 변수를 선언합니다.
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+
+// 스페이스바를 눌렀을 때 드래그 모드를 활성화합니다.
+$(document).on("keydown", function (e) {
+  if (e.keyCode === 32) {
+    // 스페이스바 키 코드
+    e.preventDefault();
+    isDragging = true;
+    $("body").css("cursor", "grab"); // 커서를 손모양으로 변경합니다.
+  }
+});
+
+// 스페이스바를 뗐을 때 드래그 모드를 비활성화합니다.
+$(document).on("keyup", function (e) {
+  if (e.keyCode === 32) {
+    isDragging = false;
+    $("body").css("cursor", "default"); // 커서를 기본 모양으로 변경합니다.
+  }
+});
+
+// 드래그 시작 위치를 저장합니다.
+$(document).on("mousedown", function (e) {
+  if (isDragging) {
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+  }
+});
+
+// 드래그로 레이어를 움직입니다.
+$(document).on("mousemove", function (e) {
+  if (isDragging) {
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+
+    const left = parseInt($("#container").css("left"), 10) || 0;
+    const top = parseInt($("#container").css("top"), 10) || 0;
+
+    // 드래그 거리만큼 레이어를 이동합니다.
+    $("#container").css({ left: left + dx, top: top + dy });
+
+    // 현재 위치를 시작 위치로 업데이트합니다.
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+  }
+});
+
+// 초기 레이어 사이즈에 맞게 조정합니다.
+fitLayerSize();
+
+// 레이어와 함께 #container를 움직입니다.
+function moveContainerWithLayer(dx, dy) {
+  const left = parseInt($("#container").css("left"), 10) || 0;
+  const top = parseInt($("#container").css("top"), 10) || 0;
+
+  // 드래그 거리만큼 레이어와 #container를 이동합니다.
+  $("#container").css({ left: left + dx, top: top + dy });
+}
+
+// 드래그로 레이어와 #container를 움직입니다.
+$(document).on("mousemove", function (e) {
+  if (isDragging) {
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+
+    // 레이어와 #container를 함께 움직입니다.
+    moveContainerWithLayer(dx, dy);
+
+    // 현재 위치를 시작 위치로 업데이트합니다.
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+  }
+});
+
+// 스페이스바를 눌렀을 때 드래그 시작 위치를 저장합니다.
+$(document).on("keydown", function (e) {
+  if (e.keyCode === 32) {
+    // 스페이스바 키 코드
+    e.preventDefault();
+    isDragging = true;
+    $("body").css("cursor", "grab"); // 커서를 손모양으로 변경합니다.
+
+    // 드래그 시작 위치를 현재 마우스 위치로 설정합니다.
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+  }
+});
+
+function updateInitialLayerSize() {
+  $("#boxWidth").val(layerWidth);
+  $("#boxHeight").val(layerHeight);
+}
+
+// Call the function to update the InfoBox on page load
+$(document).ready(function () {
+  updateInitialLayerSize();
+});
+
+$(".flex_web_left").on("wheel", function (e) {
+  if (e.ctrlKey) {
+    e.preventDefault(); // Prevent zooming when the mouse is over the "flex_web_left" box
+  }
 });
