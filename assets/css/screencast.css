@@ -59,10 +59,10 @@ html {
       #333 15px,
       #333 16px
     );
+  background-color: #000;
   z-index: 999;
 }
 #layer {
-  background: #000;
   transform-origin: center;
 }
 #zoomPercentage {
