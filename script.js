@@ -348,6 +348,9 @@ $(document).ready(function () {
         if (!$(this).hasClass("selected")) {
           return false;
         }
+        // box-sizing 속성을 border-box로 설정합니다.
+
+        $(this).css("box-sizing", "border-box");
       },
 
       stop: function (event, ui) {
@@ -363,8 +366,6 @@ $(document).ready(function () {
       containment: "#container",
 
       grid: [1, 1],
-
-      snap: ".guide-line",
 
       snapMode: "both",
 
@@ -947,15 +948,15 @@ function fitLayerToScreen() {
 
   const viewportHeight = $(window).height();
 
-  const layerWidth = $("#layer").outerWidth();
+  const layerWidthValue = $("#layer").outerWidth();
 
-  const layerHeight = $("#layer").outerHeight();
+  const layerHeightValue = $("#layer").outerHeight();
 
   // Calculate the scale required to fit the layer within the viewport
 
-  const scaleWidth = (viewportWidth * 0.75) / layerWidth; // Adjusted to 85% for more centering
+  const scaleWidth = (viewportWidth * 0.75) / layerWidthValue; // Adjusted to 85% for more centering
 
-  const scaleHeight = (viewportHeight * 0.75) / layerHeight; // Adjusted to 85% for more centering
+  const scaleHeight = (viewportHeight * 0.75) / layerHeightValue; // Adjusted to 85% for more centering
 
   zoomLevel = Math.min(scaleWidth, scaleHeight);
 
@@ -1069,15 +1070,15 @@ function fitLayerSize() {
 
   const containerHeight = $(".flex_web_left").height();
 
-  const layerWidth = $("#layer").width();
+  const layerWidthValue = $("#layer").width();
 
-  const layerHeight = $("#layer").height();
+  const layerHeightValue = $("#layer").height();
 
   // 컨테이너와 레이어의 크기를 비교하여 적절한 스케일을 계산합니다.
 
-  const scaleWidth = containerWidth / layerWidth;
+  const scaleWidth = containerWidth / layerWidthValue;
 
-  const scaleHeight = containerHeight / layerHeight;
+  const scaleHeight = containerHeight / layerHeightValue;
 
   const scale = Math.min(scaleWidth, scaleHeight) * 0.9; // 여유 공간을 두기 위해 0.9를 곱합니다.
 
@@ -1211,12 +1212,10 @@ $(document).on("keydown", function (e) {
 });
 
 function updateInitialLayerSize() {
-  $("#boxWidth").val(layerWidth);
+  $("#boxWidth").val(layerWidthValue);
 
-  $("#boxHeight").val(layerHeight);
+  $("#boxHeight").val(layerHeightValue);
 }
-
-// Call the function to update the InfoBox on page load
 
 $(document).ready(function () {
   updateInitialLayerSize();
@@ -1224,7 +1223,7 @@ $(document).ready(function () {
 
 $(".flex_web_left").on("wheel", function (e) {
   if (e.ctrlKey) {
-    e.preventDefault(); // Prevent zooming when the mouse is over the "flex_web_left" box
+    e.preventDefault();
   }
 });
 
@@ -1363,3 +1362,117 @@ $(document).ready(function () {
     maxHeight: $("#container").height(),
   });
 });
+
+// 리사이징 박스가 복사될 때, 해당 박스의 정보를 나타내는 HTML 요소도 복사되어 표시
+
+// 박스 복사 시 정보 박스도 복사
+function copyInfoBox(sourceBox, newBox) {
+  let sourceIndex = $(sourceBox).attr("data-index");
+  let newIndex = $(newBox).attr("data-index");
+  let sourceInfoBox = $("#infoBox" + sourceIndex).clone();
+  sourceInfoBox.attr("id", "infoBox" + newIndex);
+  sourceInfoBox.find("#boxX" + sourceIndex).attr("id", "boxX" + newIndex);
+  sourceInfoBox.find("#boxY" + sourceIndex).attr("id", "boxY" + newIndex);
+  sourceInfoBox
+    .find("#boxWidth" + sourceIndex)
+    .attr("id", "boxWidth" + newIndex);
+  sourceInfoBox
+    .find("#boxHeight" + sourceIndex)
+    .attr("id", "boxHeight" + newIndex);
+  $("#infoBox").append(sourceInfoBox);
+  updateInfoBoxValues(newBox);
+}
+
+// 박스가 삭제될 때, 해당 박스의 정보를 나타내는 HTML 요소도 삭제
+
+// 박스 삭제 시 정보 박스도 삭제
+function deleteInfoBox(box) {
+  let infoBoxId = "infoBox" + box.id.replace("box", "");
+  let infoBox = document.getElementById(infoBoxId);
+  if (infoBox) {
+    infoBox.remove();
+  }
+}
+
+// 각 리사이징 박스에 대한 InfoBox 생성
+function updateInfoBox() {
+  $("#infoBox").empty(); // InfoBox 컨테이너 비우기
+  $(".resizable-box").each(function (index, box) {
+    var boxId = "infoBox" + index;
+    var boxInfo =
+      '<div id="' + boxId + '"><h3>Box Information ' + (index + 1) + "</h3>";
+    boxInfo +=
+      '<div><label>X: <input type="number" class="boxX" value="' +
+      $(box).position().left +
+      '" /></label>';
+    boxInfo +=
+      '<label>Y: <input type="number" class="boxY" value="' +
+      $(box).position().top +
+      '" /></label>';
+    boxInfo +=
+      '<label>Width: <input type="number" class="boxWidth" value="' +
+      $(box).width() +
+      '" /></label>';
+    boxInfo +=
+      '<label>Height: <input type="number" class="boxHeight" value="' +
+      $(box).height() +
+      '" /></label></div></div>';
+    $("#infoBox").append(boxInfo);
+    bindInfoBoxEvents(boxId, $(box));
+  });
+}
+
+// InfoBox 이벤트 바인딩
+function bindInfoBoxEvents(infoBoxId, selectedBox) {
+  $(
+    "#" +
+      infoBoxId +
+      " .boxX, #" +
+      infoBoxId +
+      " .boxY, #" +
+      infoBoxId +
+      " .boxWidth, #" +
+      infoBoxId +
+      " .boxHeight"
+  ).on("input", function () {
+    const x = parseInt($("#" + infoBoxId + " .boxX").val(), 10);
+    const y = parseInt($("#" + infoBoxId + " .boxY").val(), 10);
+    const width =
+      parseInt($("#" + infoBoxId + " .boxWidth").val(), 10) -
+      (selectedBox.hasClass("selected") ? 2 * BORDER_WIDTH : 0);
+    const height =
+      parseInt($("#" + infoBoxId + " .boxHeight").val(), 10) -
+      (selectedBox.hasClass("selected") ? 2 * BORDER_WIDTH : 0);
+
+    selectedBox.css({
+      top: y + "px",
+      left: x + "px",
+      width: width + "px",
+      height: height + "px",
+    });
+    selectedBox
+      .find(".size-display")
+      .text(
+        width + 2 * BORDER_WIDTH + "px x " + (height + 2 * BORDER_WIDTH) + "px"
+      );
+  });
+}
+
+function createInfoBox(box) {
+  let index = $(box).attr("data-index"); // 박스의 인덱스 가져오기
+  let infoBoxHTML = `<div class="infoBox" id="infoBox${index}"><h3>Box Information ${index}</h3><div><label>X: <input type="number" id="boxX${index}" /></label><label>Y: <input type="number" id="boxY${index}" /></label><label>Width: <input type="number" id="boxWidth${index}" /></label><label>Height: <input type="number" id="boxHeight${index}" /></label></div></div>`; // infoBox HTML 생성
+  $("#infoBox").after(infoBoxHTML); // 기존 infoBox 아래에 새로운 infoBox 추가
+  updateInfoBoxValues(box); // infoBox 값 업데이트
+}
+
+function updateInfoBoxValues(box) {
+  let index = $(box).attr("data-index");
+  let x = $(box).position().left;
+  let y = $(box).position().top;
+  let width = $(box).width();
+  let height = $(box).height();
+  $("#boxX" + index).val(x);
+  $("#boxY" + index).val(y);
+  $("#boxWidth" + index).val(width);
+  $("#boxHeight" + index).val(height);
+}
